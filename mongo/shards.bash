@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# creates data directories for, spawns and
+# creates data directories for, spawns, and
 # organizes the necessary mongo processes
 # for the requested number of shards (each
 # with the requesyed number of nodes).
