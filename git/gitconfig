@@ -1,0 +1,24 @@
+[user]
+  email = gv0tch0@gmail.com
+  name = Nik Kolev
+
+[color]
+  ui = auto
+  diff = auto
+  status = auto
+  interactive = auto
+
+[alias]
+  st = status
+  sts = status --short
+  ci = commit -v
+  br = branch
+  co = checkout
+  lg = log -p
+  diffc = diff --cached
+  spull = !git-svn fetch && git-svn rebase --local
+  spush = !git-svn dcommit
+
+[core]
+  excludesfile = /Users/nkolev/.gitignore_global
+  editor = /usr/bin/vim

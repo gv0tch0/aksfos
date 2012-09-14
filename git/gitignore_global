@@ -1,0 +1,13 @@
+*~
+target
+.classpath
+.project
+.settings
+deptree.out
+classes
+lib
+dev.properties
+www-test
+gwt/ui/war/AtomSphere
+gwt/ui/war/WidgetSphere
+store/scripts/*.js
