@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# FIXME make it cygwin-independent.
+#       take the port and the root dir as arguments
+
+mongod --logpath `cygpath -w /var/lib/mongo/standalone/mongod.log` --port 40000 --dbpath `cygpath -w /var/lib/mongo/standalone` > `cygpath -w /var/lib/mongo/standalone/stdouterr.log` 2>&1 &
