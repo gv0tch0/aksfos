@@ -26,10 +26,16 @@ stop_file=
 sleep_secs=7
 rsetid=rs_`date +%s`
 cygwin=false
+osx=false
+osname=`uname -s`
 cygregex="^cygwin.*$"
+osxregex="^darwin.*$"
 shopt -s nocasematch
-if [[ `uname -s` =~ $cygregex ]]; then
+if [[ ${osname} =~ $cygregex ]]; then
     cygwin=true
+fi
+if [[ ${osname} =~ $osxregex ]]; then
+    osx=true
 fi
 
 #echoes the usage info
@@ -55,6 +61,21 @@ function trim_trailing_slash() {
     fi
 }
 
+#echos the abolute path to the directory specified
+#by the first argument passed in. used in an os x
+#environment which wierd readlink implementation.
+function abs_path() {
+    if [ $# -ne 1 ]; then
+        echo "FATAL: i accept 1 argument. i got $# arguments instead."
+        exit 1
+    fi
+
+    cd $1
+    result=`pwd -P`
+    cd - > /dev/null &2>1
+    echo ${result}
+}
+
 #grabs the number of nodes and the data root directory
 #from the command line
 function process_args() {
@@ -71,12 +92,15 @@ function process_args() {
         exit 1
     fi
 
-    data_root=`readlink -f $2`
-    data_root=`trim_trailing_slash ${data_root}`
-    if [[ ! -d ${data_root} ]]; then
-        echo "ERROR: the second argument (${data_root}) must be a directory."
+    if [[ ! -d $2 ]]; then
+        echo "ERROR: the second argument ('$2') must be a directory."
         usage
         exit 1
+    fi
+    if ${osx}; then
+        data_root=`abs_path $2`
+    else
+        data_root=`readlink -f $2`
     fi
 
     echo "will create a replica set with '${num_nodes}' nodes (an arbiter will be added if the"
@@ -193,4 +217,4 @@ wait `echo $!`
 #     configuration by for example asking the mongod-s what state they are in.
 echo "letting the mongod processes start before applying the replica set configuration..."
 sleep ${sleep_secs} 
-mongo 127.0.0.1:50000 ${rsetid}.js
+mongo 127.0.0.1:50000 ${rset_file}
