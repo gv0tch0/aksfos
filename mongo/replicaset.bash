@@ -74,9 +74,9 @@ fi
 #virtual memory limit detection - when there's a limit
 #let's start with small files, a 1G-capped oplog, and
 #a capped DB size (2 small files = 1G).
-smallfiles=""
+sizes=""
 if [ $(ulimit -a | grep -i "virtual memory" | grep -i "unlimited" | wc -l) -eq 0 ]; then
-    smallfiles="--smallfiles --oplogSize=1024 --quota --quotaFiles=2"
+    sizes="--smallfiles --oplogSize=1024 --quota --quotaFiles=2"
 fi
 
 #echoes the usage info
@@ -206,12 +206,12 @@ function cmd_mongod() {
     outerr_file=${data_dir}/outerr.log
     port=5000${node_num}
     mkdir -p ${data_dir}
-    cmd="${mongod} --fork --logpath ${log_file} --port ${port} --replSet ${rsetid} --dbpath ${data_dir} ${smallfiles}"
+    cmd="${mongod} --fork --logpath ${log_file} --port ${port} --replSet ${rsetid} --dbpath ${data_dir} ${sizes}"
     if ${cygwin}; then
         log_file='`cygpath -w '${log_file}'`'
         data_dir='`cygpath -w '${data_dir}'`'
         outerr_file='`cygpath -w '${outerr_file}'`'
-        cmd="${mongod} --logpath ${log_file} --port ${port} --replSet ${rsetid} --dbpath ${data_dir} ${smallfiles} > ${outerr_file} 2>&1 &"
+        cmd="${mongod} --logpath ${log_file} --port ${port} --replSet ${rsetid} --dbpath ${data_dir} ${sizes} > ${outerr_file} 2>&1 &"
     fi
     echo ${cmd} >> ${start_file}
 }
