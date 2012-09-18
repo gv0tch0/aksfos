@@ -221,5 +221,8 @@ wait `echo $!`
 #TODO get smarter as to how long to wait before trying to apply the replica set
 #     configuration by for example asking the mongod-s what state they are in.
 echo "letting the mongod processes start before applying the replica set configuration..."
-sleep ${sleep_secs} 
+sleep ${sleep_secs}
+if ${cygwin}; then
+    rset_file="`cygpath -w ${rset_file}`"
+fi
 mongo 127.0.0.1:50000 ${rset_file}
