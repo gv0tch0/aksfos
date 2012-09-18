@@ -12,10 +12,13 @@
 #  - ports {50000..<nodes>}
 #    are available to be bound to
 
-#set -x # this makes bash print all the commands that
-       # it is executing
-set -e # this makes bash exit as soon as any of the
-       # commands it ran returned non-zero
+#this makes bash print all the commands that
+#it is executing
+#set -x
+
+#this makes bash exit as soon as any of the
+#commands it ran returned non-zero
+set -e
 
 #globals
 data_root=
@@ -25,6 +28,8 @@ start_file=
 stop_file=
 sleep_secs=7
 rsetid=rs_`date +%s`
+
+#host os detection
 cygwin=false
 osx=false
 osname=`uname -s`
