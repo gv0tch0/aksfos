@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# creates data directories for, spawns and
+# creates data directories for, spawns, and
 # organizes the necessary mongo processes
 # for a mongo replica set.
 # all of that is done in the local machine
@@ -7,10 +7,26 @@
 # set.
 #
 # prerequisites:
-#  - bash 4+
+#  - bash 3+
 #  - mongo executables are on the path
 #  - ports {50000..<nodes>}
 #    are available to be bound to
+#
+# TODO
+#  - Get smarter about the size of the oplog and vmem
+#    limit handling:
+#    -- Observe the ulimit setting and make the oplog
+#       a percentage of the that.
+#    -- The use of --quota and --quotaFiles to limit
+#       the size of databases should also be as a
+#       percentage of the ulimit vmem cap.
+#  - Get smarter as to how long to wait before trying
+#    to apply the replica set configuration by for
+#    example asking the mongod-s what state they are
+#    in.
+#  - Optionally take quota and oplog size as command
+#    line parameters. These would override the vmem
+#    ulimit handling.
 
 #this makes bash print all the commands that
 #it is executing
@@ -32,15 +48,35 @@ rsetid=rs_`date +%s`
 #host os detection
 cygwin=false
 osx=false
+nix=true
 osname=`uname -s`
 cygregex="^cygwin.*$"
 osxregex="^darwin.*$"
 shopt -s nocasematch
 if [[ ${osname} =~ $cygregex ]]; then
     cygwin=true
+    nix=false
 fi
 if [[ ${osname} =~ $osxregex ]]; then
     osx=true
+fi
+
+#numa arch detection - when true mongo runs better
+#with --interleave=all
+mongod="mongod"
+if ${nix}; then
+    numa=$(lscpu | grep -i numa | cut -d ":" -f 2 | sed 's/ //g')
+    if [[ $numa == [0-9]* ]] && [ $numa -gt 0 ]; then
+        mongod="numactl --interleave=all mongod"
+    fi
+fi
+
+#virtual memory limit detection - when there's a limit
+#let's start with small files, a 1G-capped oplog, and
+#a capped DB size (2 small files = 1G).
+smallfiles=""
+if [ $(ulimit -a | grep -i "virtual memory" | grep -i "unlimited" | wc -l) -eq 0 ]; then
+    smallfiles="--smallfiles --oplogSize=1024 --quota --quotaFiles=2"
 fi
 
 #echoes the usage info
@@ -170,12 +206,12 @@ function cmd_mongod() {
     outerr_file=${data_dir}/outerr.log
     port=5000${node_num}
     mkdir -p ${data_dir}
-    cmd="mongod --fork --logpath ${log_file} --port ${port} --replSet ${rsetid} --dbpath ${data_dir}"
+    cmd="${mongod} --fork --logpath ${log_file} --port ${port} --replSet ${rsetid} --dbpath ${data_dir} ${smallfiles}"
     if ${cygwin}; then
         log_file='`cygpath -w '${log_file}'`'
         data_dir='`cygpath -w '${data_dir}'`'
         outerr_file='`cygpath -w '${outerr_file}'`'
-        cmd="mongod --logpath ${log_file} --port ${port} --replSet ${rsetid} --dbpath ${data_dir} > ${outerr_file} 2>&1 &"
+        cmd="${mongod} --logpath ${log_file} --port ${port} --replSet ${rsetid} --dbpath ${data_dir} ${smallfiles} > ${outerr_file} 2>&1 &"
     fi
     echo ${cmd} >> ${start_file}
 }
@@ -218,8 +254,6 @@ generate_rset_config
 echo "starting the mongod processes..."
 sh ${start_file}
 wait `echo $!`
-#TODO get smarter as to how long to wait before trying to apply the replica set
-#     configuration by for example asking the mongod-s what state they are in.
 echo "letting the mongod processes start before applying the replica set configuration..."
 sleep ${sleep_secs}
 if ${cygwin}; then
