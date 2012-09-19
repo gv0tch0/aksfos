@@ -27,6 +27,12 @@
 #  - Optionally take quota and oplog size as command
 #    line parameters. These would override the vmem
 #    ulimit handling.
+#
+# BUGS
+#  - lscpu is not available on OSX but we try to run
+#    it.
+#  - A file by name 1 gets created in the data root
+#    on OSX.
 
 #this makes bash print all the commands that
 #it is executing
