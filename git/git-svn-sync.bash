@@ -11,10 +11,9 @@
 # - `spull' is defined as `git-svn fetch && git-svn rebase --local' in the user's gitconfig
 
 # TODO
-# * Gracefully handle dirty trees. As in `git spull' fails when the tree is dirty. One
-#   option will be to stash the changes, do the spull, and unstash the changes. That
-#   probably is a bad option though as the unstashing may run into conflicts. Another
-#   option would be to WARN and not attempt the `git spull'.
+# * Do not assume a standard svn repo structure. Instead `svn list` and only do standard
+#   if trunk|tags|branches are present. Even better would be to do a discovery step of the
+#   svn repo's structure and then clone at the right levels.
 # * Fork a sub-shell for each project which does the work outlined in step 3 above.
 #   This will definitely speed things up, assuming the svn repo does not slow down because
 #   of the concurrent requests.
@@ -65,8 +64,10 @@ function ensure_project_dir() {
         mkdir -p $prj_dir
         mkdir_exit=$?
         if [ $mkdir_exit -ne 0 ]; then
-            echo "ERROR: could not create the project directory '$prj_dir'..."
+            echo "ERROR: could not create the project directory '$prj_dir'."
             exit $mkdir_exit
+        else
+            echo "INFO: successfully created the '$prj_dir' directory."
         fi
     fi
 }
@@ -79,11 +80,16 @@ for prjct in "${svn_prjcts[@]}"; do
     if [ -d $prjct ]; then
         echo "INFO: $prjct directory exists. will try to refresh it if it is a git svn clone..."
         if [ ! -d $prjct/.git ]; then
-            echo "WARNING: $prjct does not appear to be a git repository. skipping it..."
+            echo "WARN: $prjct does not appear to be a git repository. skipping it."
         else
-            echo "INFO: $prjct is a git repository. updating the current branch..."
+            echo "INFO: $prjct is a git repository. will try to update the current branch..."
             cd $prjct
-            git spull
+            if [ $(git status 2> /dev/null | tail -n1) != "nothing to commit, working directory clean" ]; then
+                echo "INFO: the git clone is clean. pulling latest svn changes..."
+                git spull
+            else
+                echo "WARN: the git clone is dirty. please commit/revert/stash changes and pull manually."
+            fi
             cd ..
         fi
     else
