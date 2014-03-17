@@ -1,0 +1,42 @@
+<configuration type="stage" version="1.0">
+    <drmSettings>
+        <add key="DRMNetworkRequestTimeout" value="10000"/>
+        <add key="CimaEndPoint" value="https://consecservice-stage.ccp.xcal.tv/cima/login"/>
+        <add key="MetadataEndPoint" value="https://consecservice-stage.ccp.xcal.tv/flashaccess/resource/metadata?env=stage"/>
+        <add key="ProductType" value="cdvr"/>
+    </drmSettings>
+    <easSettings>
+        <add key="ZipToFipsEndPoint" value="http://69.252.105.154/easws/api/fips/zip/"/>
+        <add key="AlertServiceEndPoint" value="http://69.252.105.154/easws/api/alert/active/fipscode/"/>
+        <add key="EasUpdateInterval" value="15000"/>
+        <add key="EasAlertRepeat" value="1"/>
+        <add key="EasAlertFontSize" value="20.0f"/>
+        <add key="EasAlertFont" value="Helvetica-Bold"/>
+    </easSettings>
+    <analyticsSettings>
+	<add key="AnalyticsEndpoint" value="http://qa-analytics.bdn.lab.xcal.tv/player"/>
+        <add key="AnalyticsProtocol" value="1.2-p1"/>
+        <add key="AnalyticsDeviceType" value="cDVR-X2-Android"/>
+        <add key="MaxBatchSize" value="10"/>
+        <add key="MaxQueueSize" value="100"/>
+        <add key="BatchInterval" value="5000"/>
+    </analyticsSettings>
+    <appSettings>
+        <add key="HeartbeatInterval" value="60000"/>
+        <add key="Autoplay" value="true"/>
+        <add key="AbrPolicy" value="ABR_MODERATE"/>
+        <add key="MinimumBitrate" value="0"/>
+        <add key="MaximumBitrate" value="12000000"/>
+        <add key="InitialBitrate" value="0"/>
+        <add key="InitialBuffer" value="4000"/>
+        <add key="PlaybackBuffer" value="80000"/>
+        <add key="PlayingLinearBufferTime" value="15000"/>
+        <add key="RetryOnMediaFailed" value="true"/>
+    </appSettings>
+    <auditudeSettings>
+        <add key="DomainId" value="auditude.com"/>
+        <add key="ZoneId" value="2637"/>
+	<add key="zenCodingEnabled" value="true"/>
+        <add key="CustomParams" paramKey="plr" paramValue="androidpts"/>
+    </auditudeSettings>
+</configuration>
